@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-//use App\Http\Requests;
+use App\Http\Requests;
 use App\Models\DtWord;
 use App\Models\Question;
 
@@ -11,7 +11,12 @@ class TestController extends Controller
 {
     //
 
-    public function test(DtWord $dt_word)
+    public function test(Request $r)
+    {
+        return var_dump($r->fill !== null);
+    }
+
+    public function test_combind_words(DtWord $dt_word)
     {
         $words = $dt_word
                 ->where('id', '>', '6075')
@@ -36,16 +41,24 @@ class TestController extends Controller
             ];
         }
         
-        return var_dump($tra_word);
+        return function() {
+            if (empty($tra_word))
+            {
+                return "没有数据";
+            } else {
+                return var_dump($tra_word);
+            }
+        };
     }
 
-    public function test2(DtWord $dt_word)
+    public function refill_words(DtWord $dt_word, Request $request)
     {
         $total = 0;
         $succ = 0;
         $fail = 0;
         $tra_word = array();
-        DtWord::chunk(200, function($words) use(&$total, &$succ, &$fail, &$tra_word) {
+        DtWord::chunk(200, function($words) use(&$total, &$succ, &$fail, &$tra_word, &$request) {
+            $exit = 0;
             foreach ($words as $key => $value) {
                 ++$total;
                 $question = new Question;
@@ -87,10 +100,20 @@ class TestController extends Controller
                     ]),
                     'key' => ''
                 ];
+
+                if ($request->fill !== null && $total > $request->fill)
+                {
+                    $exit = 1;
+                    return;
+                }
+            }
+
+            if($exit === 1)
+            {
+                return false;
             }
         });
 
-        return $total . ' / ' . $succ . ' / ' . $fail;
-        //return $tra_word;
+        return $total . ' / ' . $succ . ' / ' . $fail . "\n" . var_dump($tra_word);
     }
 }

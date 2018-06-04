@@ -15,7 +15,9 @@ class CreatePapersTable extends Migration
     {
         Schema::create('papers', function (Blueprint $table) {
             $table->increments('id');
-            // quiz_indexes
+            // quiz_uuid
+            $table->uuid('uuid');
+            // quiz_contents
             $table->string('quiz_ids');
             $table->longText('quizes');
             // time_logs
