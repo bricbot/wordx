@@ -16,9 +16,9 @@ class CreateSelfCorrectionsTable extends Migration
         Schema::create('self_corrections', function (Blueprint $table) {
             $table->increments('id');
             // Essential
-            $table->string('paper_id');
+            $table->uuid('paper_uuid');
             $table->string('student_id');
-            $table->string('img_path');
+            $table->string('img_path')->nullable();
             // Correction
             $table->string('quiz_ids');
             $table->longText('self_corrections');

@@ -7,9 +7,16 @@ use App\Http\Requests;
 use App\Models\DtWord;
 use App\Models\Question;
 
+use Debugbar;
+
 class TestController extends Controller
 {
     //
+
+    function __construct()
+    {
+        \Debugbar::enable();
+    }
 
     public function test(Request $r)
     {
@@ -18,37 +25,7 @@ class TestController extends Controller
 
     public function test_combind_words(DtWord $dt_word)
     {
-        $words = $dt_word
-                ->where('id', '>', '6075')
-                ->where('id', '<', '6105')
-                ->get();
-        foreach ($words as $key => $value) {
-            $tra_word[$key] = [
-                'subject' => 'english',
-                'book' => 'vocabulary-' . $value->book,
-                'unit' => $value->category,
-                'chapter' => '',
-                'list' => $value->list,
-                'page' => $value->page,
-                'number' => $value->number,
-                'quiz' => json_encode([
-                    'word' => $value->word,
-                    'symbol' => $value->symbol,
-                    'meaning' => $value->pos . ' ' . $value->meaning,
-                    'omeaning' => $value->omeaning
-                ]),
-                'key' => ''
-            ];
-        }
         
-        return function() {
-            if (empty($tra_word))
-            {
-                return "没有数据";
-            } else {
-                return var_dump($tra_word);
-            }
-        };
     }
 
     public function refill_words(DtWord $dt_word, Request $request)
@@ -56,64 +33,53 @@ class TestController extends Controller
         $total = 0;
         $succ = 0;
         $fail = 0;
-        $tra_word = array();
-        DtWord::chunk(200, function($words) use(&$total, &$succ, &$fail, &$tra_word, &$request) {
-            $exit = 0;
-            foreach ($words as $key => $value) {
-                ++$total;
-                $question = new Question;
-                $question->subject = 'english';
-                $question->book = 'vocabulary-' . $value->book;
-                $question->unit = $value->category;
-                $question->chapter = '';
-                $question->list = $value->list;
-                $question->page = $value->page;
-                $question->number = $value->number;
-                $question->quiz = json_encode([
-                    'word' => $value->word,
-                    'symbol' => $value->symbol,
-                    'meaning' => $value->pos . ' ' . $value->meaning,
-                    'omeaning' => $value->omeaning
-                ]);
-                $question->key = '';
 
-                if ($question->save())
-                {
-                    ++$succ;
-                } else {
-                    ++$fail;
-                }
-
-                $tra_word[$key] = [
-                    'subject' => 'english',
-                    'book' => 'vocabulary-' . $value->book,
-                    'unit' => $value->category,
-                    'chapter' => '',
-                    'list' => $value->list,
-                    'page' => $value->page,
-                    'number' => $value->number,
-                    'quiz' => json_encode([
+        if ($dt_word->all()->count() > 0)
+        {
+            Debugbar::info('Starting refill!');
+            DtWord::chunk(200, function($words) use (&$total, &$succ, &$fail, &$request) {
+                $exit = 0;
+                foreach ($words as $key => $value) {
+                    ++$total;
+                    $question = new Question;
+                    $question->subject = 'english';
+                    $question->book = 'vocabulary-' . $value->book;
+                    $question->unit = $value->category;
+                    $question->chapter = '';
+                    $question->list = $value->list;
+                    $question->page = $value->page;
+                    $question->number = $value->number;
+                    $question->quiz = json_encode([
                         'word' => $value->word,
                         'symbol' => $value->symbol,
                         'meaning' => $value->pos . ' ' . $value->meaning,
                         'omeaning' => $value->omeaning
-                    ]),
-                    'key' => ''
-                ];
-
-                if ($request->fill !== null && $total > $request->fill)
-                {
-                    $exit = 1;
-                    return;
+                    ]);
+                    $question->key = '';
+    
+                    if ($question->save())
+                    {
+                        ++$succ;
+                    } else {
+                        ++$fail;
+                    }
+                    
+                    if ($request->fill !== null && $total > $request->fill)
+                    {
+                        $exit = 1;
+                        return;
+                    }
                 }
-            }
-
-            if($exit === 1)
-            {
-                return false;
-            }
-        });
-
-        return $total . ' / ' . $succ . ' / ' . $fail . "\n" . var_dump($tra_word);
+    
+                if($exit === 1)
+                {
+                    return false;
+                }
+            });
+        } else {
+            Debugbar::error('Source data not exist! Please using Sequel Pro to import correct sql file in "wordx" database.');
+        }
+        
+        return $total . ' / ' . $succ . ' / ' . $fail . "\n";
     }
 }

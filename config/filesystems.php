@@ -55,6 +55,12 @@ return [
             'visibility' => 'public',
         ],
 
+        // 试卷拍照图
+        'papers_img' => [
+            'driver' => 'local',
+            'root' => public_path('papers_img'),
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

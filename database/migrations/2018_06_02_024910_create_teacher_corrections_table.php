@@ -16,9 +16,9 @@ class CreateTeacherCorrectionsTable extends Migration
         Schema::create('teacher_corrections', function (Blueprint $table) {
             $table->increments('id');
             // Essential
-            $table->string('paper_id');
+            $table->uuid('paper_uuid');
             $table->string('student_id');
-            $table->string('img_path');
+            $table->string('img_path')->nullable();
             // Correction Logs
             $table->string('comments');
             $table->string('essential_data');

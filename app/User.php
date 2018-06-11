@@ -9,13 +9,15 @@ class User extends Authenticatable
 {
     use Notifiable;
 
+    protected $table = 'users';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'account', 'email', 'password', 'role'
     ];
 
     /**
@@ -26,4 +28,19 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function paper_with_teacher()
+    {
+        return $this->belongsTo('App\Models\Paper', 'teacher_id', 'id');
+    }
+
+    public function paper_with_assistant()
+    {
+        return $this->belongsTo('App\Models\Paper', 'assistant_id', 'id');
+    }
+    
+    public function paper_with_student()
+    {
+        return $this->belongsTo('App\Models\Paper', 'student_id', 'id');
+    }
 }

@@ -24,8 +24,8 @@ class CreateQuestionsTable extends Migration
             $table->string('page')->nullable();
             $table->string('number');
             // Quiz
-            $table->string('quiz');
-            $table->string('key')->nullable();
+            $table->longText('quiz');
+            $table->longText('key')->nullable();
             // Misc.
             $table->timestamps();
         });

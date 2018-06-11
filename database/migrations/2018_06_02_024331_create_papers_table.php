@@ -15,17 +15,24 @@ class CreatePapersTable extends Migration
     {
         Schema::create('papers', function (Blueprint $table) {
             $table->increments('id');
-            // quiz_uuid
-            $table->uuid('uuid');
+            // quiz_flag
+            $table->uuid('uuid')->unique();
+            $table->string('alias')->nullable();
             // quiz_contents
             $table->string('quiz_ids');
             $table->longText('quizes');
+            $table->unsignedTinyInteger('total_pages')->nullable();
+            $table->string('correct_template');
+            // permit_status
+            $table->longText('img_path')->nullable();
+            $table->unsignedTinyInteger('permit_self_correct')->nullable()->default(0);
+            $table->unsignedTinyInteger('complete_self_correct')->nullable()->default(0);
             // time_logs
             $table->dateTime('create_time');
-            $table->date('check_time');
-            $table->dateTime('complete_time');
-            $table->dateTime('self_correct_time');
-            $table->dateTime('correct_time');
+            $table->date('practice_time')->nullable();
+            $table->dateTime('confirm_time')->nullable();
+            $table->dateTime('self_correct_time')->nullable();
+            $table->dateTime('teacher_correct_time')->nullable();
             // oprater_logs
             $table->string('teacher_id');
             $table->string('assistant_id');
